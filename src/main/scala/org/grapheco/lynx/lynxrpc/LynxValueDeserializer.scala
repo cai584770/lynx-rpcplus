@@ -2,7 +2,6 @@ package org.grapheco.lynx.lynxrpc
 
 import io.grpc.netty.shaded.io.netty.buffer.ByteBuf
 import org.grapheco.lynx._
-import org.grapheco.lynx.lynxrpc.BaseDeserializer
 
 /**
  * @Author: Airzihao
