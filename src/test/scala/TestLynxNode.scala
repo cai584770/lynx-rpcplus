@@ -1,3 +1,4 @@
+import org.grapheco.lynx.lynxrpc.LynxIdImpl
 import org.grapheco.lynx.{LynxId, LynxInteger, LynxNode, LynxNodeLabel, LynxPropertyKey, LynxValue}
 
 /**
@@ -7,11 +8,7 @@ import org.grapheco.lynx.{LynxId, LynxInteger, LynxNode, LynxNodeLabel, LynxProp
  * @Modified By:
  */
 class TestLynxNode(nid: Long, nlabels: Seq[String], props: Map[String, LynxValue]) extends LynxNode{
-  override val id: LynxId = new LynxId {
-    override val value: Any = nid
-
-    override def toLynxInteger: LynxInteger = LynxInteger(nid)
-  }
+  override val id: LynxId = new LynxIdImpl(nid)
 
   override def labels: Seq[LynxNodeLabel] = nlabels.map(string => LynxNodeLabel(string))
 

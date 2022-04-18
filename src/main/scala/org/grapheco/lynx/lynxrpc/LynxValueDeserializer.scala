@@ -20,6 +20,7 @@ class LynxValueDeserializer extends BaseDeserializer {
       case SerializerDataType.LYNXLIST => _decodeLynxList(byteBuf)
       case SerializerDataType.LYNXMAP => _decodeLynxMap(byteBuf)
       case SerializerDataType.LYNXNODE => _decodeLynxNode(byteBuf)
+      case SerializerDataType.LYNXRELATIONSHIP => _decodeLynxRelationship(byteBuf)
     }
   }
 
@@ -50,22 +51,42 @@ class LynxValueDeserializer extends BaseDeserializer {
       val _labels: List[LynxString] = decodeLynxValue(bytebuf).asInstanceOf[LynxList].value.asInstanceOf[List[LynxString]]
       val _props: Map[String, LynxValue] = decodeLynxValue(bytebuf).asInstanceOf[LynxMap].value
 
-      override val id: LynxId = new LynxId {
-        override val value: Any = _id
-        override def toLynxInteger: LynxInteger = value.asInstanceOf[LynxInteger]
-      }
+      override val id: LynxId = new LynxIdImpl(_id)
 
       override def labels: Seq[LynxNodeLabel] = {
         _labels.map(lynxString => LynxNodeLabel(lynxString.value))
       }
 
       override def keys: Seq[LynxPropertyKey] = {
-        _props.keys.map(LynxPropertyKey(_)).toSeq
+        _props.keys.map(LynxPropertyKey).toSeq
       }
 
       override def property(propertyKey: LynxPropertyKey): Option[LynxValue] = {
         _props.get(propertyKey.value)
       }
+    }
+  }
+
+  private def _decodeLynxRelationship(byteBuf: ByteBuf): LynxRelationship = {
+    new LynxRelationship {
+      val _id: LynxInteger = decodeLynxValue(byteBuf).asInstanceOf[LynxInteger]
+      val _relationshipType: LynxRelationshipType = LynxRelationshipType(decodeLynxValue(byteBuf).asInstanceOf[LynxString].value)
+      val _startId: LynxInteger = decodeLynxValue(byteBuf).asInstanceOf[LynxInteger]
+      val _endId: LynxInteger = decodeLynxValue(byteBuf).asInstanceOf[LynxInteger]
+      val _props: Map[String, LynxValue] = decodeLynxValue(byteBuf).asInstanceOf[LynxMap].value
+      override val id: LynxId = new LynxId {
+        override val value: Any = _id
+
+        override def toLynxInteger: LynxInteger = _id
+      }
+      override val startNodeId: LynxId = new LynxIdImpl(_id)
+      override val endNodeId: LynxId = new LynxIdImpl(_id)
+
+      override def relationType: Option[LynxRelationshipType] = Some(_relationshipType)
+
+      override def keys: Seq[LynxPropertyKey] = _props.keys.map(LynxPropertyKey).toSeq
+
+      override def property(propertyKey: LynxPropertyKey): Option[LynxValue] = _props.get(propertyKey.value)
     }
   }
 

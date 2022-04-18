@@ -34,6 +34,7 @@ class LynxValueSerializer extends BaseSerializer {
         byteBuf.writeByte(SerializerDataType.LYNXMAP.id)
         _encodeLynxMap(byteBuf, lynxMap)
       case lynxNode: LynxNode => _encodeLynxNode(byteBuf, lynxNode)
+      case lynxRelationship: LynxRelationship => _encodeLynxRelationship(byteBuf, lynxRelationship)
       case _ => throw new Exception(s"Unexpected type of ${value}")
     }
     byteBuf
@@ -83,14 +84,30 @@ class LynxValueSerializer extends BaseSerializer {
   }
 
   private def _encodeLynxNode(byteBuf: ByteBuf, node: LynxNode): ByteBuf = {
-    val id = node.value.id
+    val id: LynxId = node.value.id
     val labels: List[LynxString] = node.value.labels.map(lynxNodeLabel => LynxString(lynxNodeLabel.value)).toList
-    // Warning: The prop may not exist.
+    // TODO Warning: The prop may not exist.
     val propsMap: Map[String, LynxValue] = node.value.keys.map(key => key.value -> node.value.property(key).get).toMap
     byteBuf.writeByte(SerializerDataType.LYNXNODE.id)
     encodeLynxValue(byteBuf, id.toLynxInteger)
     encodeLynxValue(byteBuf, LynxList(labels))
     encodeLynxValue(byteBuf, LynxMap(propsMap))
   }
+
+  private def _encodeLynxRelationship(byteBuf: ByteBuf, relationship: LynxRelationship): ByteBuf = {
+    val id = relationship.value.id
+    // TODO Warning the relationshiptype may not exist.
+    val relationshipType: String = relationship.relationType.get.value
+    val startId: LynxId = relationship.startNodeId
+    val endId: LynxId = relationship.endNodeId
+    val propsMap: Map[String, LynxValue] = relationship.value.keys.map(key => key.value -> relationship.value.property(key).get).toMap
+    byteBuf.writeByte(SerializerDataType.LYNXRELATIONSHIP.id)
+    encodeLynxValue(byteBuf, id.toLynxInteger)
+    encodeLynxValue(byteBuf, LynxString(relationshipType))
+    encodeLynxValue(byteBuf, startId.toLynxInteger)
+    encodeLynxValue(byteBuf, endId.toLynxInteger)
+    encodeLynxValue(byteBuf, LynxMap(propsMap))
+  }
+
 
 }

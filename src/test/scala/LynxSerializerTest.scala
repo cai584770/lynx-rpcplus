@@ -150,8 +150,16 @@ class LynxSerializerTest {
   //Test LynxNode
   @Test
   def test17(): Unit = {
-    val node = new TestLynxNode(100l, List("label1", "label2"), Map("p1" -> LynxString("bob")))
+    val lynxList = LynxList(List(1, 2.0, "", "123?", -1.0D, true).map(LynxValue(_)))
+    val node = new TestLynxNode(100l, List("label1", "label2"), Map("p1" -> lynxList))
     _testFunc(node)
+  }
+
+  @Test
+  def test18(): Unit = {
+    val lynxList = LynxList(List(1, 2.0, "", "123?", -1.0D, true).map(LynxValue(_)))
+    val relationship = new TestLynxRelationship(100l, "type1", 101l, 102l, Map("p1" -> lynxList))
+    _testFunc(relationship)
   }
 
   private def _testFunc(input: Any): Unit ={
@@ -173,13 +181,34 @@ class LynxSerializerTest {
       case lynxMap: LynxMap => Assert.assertTrue(_compareLynxMap(lynxMap, deserialized.asInstanceOf[LynxMap]))
       case lynxNode: LynxNode => {
         val expectedNode: LynxNode = input.asInstanceOf[TestLynxNode]
-        Assert.assertEquals(expectedNode.id.toLynxInteger, lynxNode.value.id.toLynxInteger)
         val expectedLabels: Array[String] = expectedNode.labels.map(lynxNodeLabel => lynxNodeLabel.value).toArray
         val actualLabels: Array[String] = lynxNode.labels.map(lynxNodeLabel => lynxNodeLabel.value).toArray
-        expectedLabels.zip(actualLabels).foreach(pair => Assert.assertEquals(pair._1, pair._2))
         val expectedPropMap: LynxMap = LynxMap(expectedNode.keys.map(key => key.value -> expectedNode.property(key).get).toMap)
         val actualPropMap: LynxMap = LynxMap(lynxNode.keys.map(key => key.value -> expectedNode.property(key).get).toMap)
+
+        Assert.assertEquals(expectedNode.id.toLynxInteger.value, lynxNode.value.id.toLynxInteger.value)
+        expectedLabels.zip(actualLabels).foreach(pair => Assert.assertEquals(pair._1, pair._2))
         _compareLynxMap(expectedPropMap, actualPropMap)
+      }
+      case lynxRelationship: LynxRelationship => {
+        val expectedRelationship: LynxRelationship = input.asInstanceOf[LynxRelationship]
+        val expectedType: String = expectedRelationship.relationType.get.value
+        val actualType: String = lynxRelationship.relationType.get.value
+
+        val expectedStartId: Long = expectedRelationship.startNodeId.toLynxInteger.value
+        val actualStartId: Long = lynxRelationship.startNodeId.toLynxInteger.value
+
+        val expectedEndId: Long = expectedRelationship.endNodeId.toLynxInteger.value
+        val actualEndId: Long = lynxRelationship.endNodeId.toLynxInteger.value
+
+        val expectedPropsMap: LynxMap = LynxMap(expectedRelationship.keys.map(key => key.value -> expectedRelationship.property(key).get).toMap)
+        val actualPropsMap: LynxMap = LynxMap(lynxRelationship.keys.map(key => key.value -> lynxRelationship.property(key).get).toMap)
+
+        Assert.assertEquals(expectedRelationship.id.toLynxInteger.value, lynxRelationship.id.toLynxInteger.value)
+        Assert.assertEquals(expectedType, actualType)
+        Assert.assertEquals(expectedStartId, actualStartId)
+        Assert.assertEquals(expectedEndId, actualEndId)
+        _compareLynxMap(expectedPropsMap, actualPropsMap)
       }
     }
   }
