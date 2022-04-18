@@ -58,6 +58,9 @@ object SerializerDataType extends Enumeration {
 
   val ARRAY_ARRAY = Value(17, "L")
 
+  val LYNXNODE = Value(18, "LynxNode")
+  val LYNXRELATIONSHIP = Value(19, "LynxRelationship")
+
   val ANY = Value(127, "Any")
   val ARRAY_ANY = Value(-ANY.id, "Array_Any")
 

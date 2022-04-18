@@ -19,6 +19,7 @@ class LynxValueDeserializer extends BaseDeserializer {
       case SerializerDataType.BOOLEAN => LynxBoolean(byteBuf.readBoolean())
       case SerializerDataType.LYNXLIST => _decodeLynxList(byteBuf)
       case SerializerDataType.LYNXMAP => _decodeLynxMap(byteBuf)
+      case SerializerDataType.LYNXNODE => _decodeLynxNode(byteBuf)
     }
   }
 
@@ -41,6 +42,31 @@ class LynxValueDeserializer extends BaseDeserializer {
     val typeFlag: Int = byteBuf.readByte().toInt
     val length: Int = byteBuf.readInt()
     LynxMap(new Array[Int](length).map(_ => _decodeStringWithFlag(byteBuf) -> decodeLynxValue(byteBuf)).toMap)
+  }
+
+  private def _decodeLynxNode(bytebuf: ByteBuf): LynxNode = {
+    new LynxNode {
+      val _id: LynxInteger = decodeLynxValue(bytebuf).asInstanceOf[LynxInteger]
+      val _labels: List[LynxString] = decodeLynxValue(bytebuf).asInstanceOf[LynxList].value.asInstanceOf[List[LynxString]]
+      val _props: Map[String, LynxValue] = decodeLynxValue(bytebuf).asInstanceOf[LynxMap].value
+
+      override val id: LynxId = new LynxId {
+        override val value: Any = _id
+        override def toLynxInteger: LynxInteger = value.asInstanceOf[LynxInteger]
+      }
+
+      override def labels: Seq[LynxNodeLabel] = {
+        _labels.map(lynxString => LynxNodeLabel(lynxString.value))
+      }
+
+      override def keys: Seq[LynxPropertyKey] = {
+        _props.keys.map(LynxPropertyKey(_)).toSeq
+      }
+
+      override def property(propertyKey: LynxPropertyKey): Option[LynxValue] = {
+        _props.get(propertyKey.value)
+      }
+    }
   }
 
 }

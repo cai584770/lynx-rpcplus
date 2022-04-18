@@ -147,6 +147,13 @@ class LynxSerializerTest {
     _testFunc(lynxMap)
   }
 
+  //Test LynxNode
+  @Test
+  def test17(): Unit = {
+    val node = new TestLynxNode(100l, List("label1", "label2"), Map("p1" -> LynxString("bob")))
+    _testFunc(node)
+  }
+
   private def _testFunc(input: Any): Unit ={
     val lynxValue: LynxValue = input match {
       case lV: LynxValue => lV
@@ -164,6 +171,16 @@ class LynxSerializerTest {
       case lynxBoolean: LynxBoolean => Assert.assertEquals(lynxBoolean.value, deserialized.value)
       case lynxList: LynxList => Assert.assertTrue(_compareLynxList(lynxList, deserialized.asInstanceOf[LynxList]))
       case lynxMap: LynxMap => Assert.assertTrue(_compareLynxMap(lynxMap, deserialized.asInstanceOf[LynxMap]))
+      case lynxNode: LynxNode => {
+        val expectedNode: LynxNode = input.asInstanceOf[TestLynxNode]
+        Assert.assertEquals(expectedNode.id.toLynxInteger, lynxNode.value.id.toLynxInteger)
+        val expectedLabels: Array[String] = expectedNode.labels.map(lynxNodeLabel => lynxNodeLabel.value).toArray
+        val actualLabels: Array[String] = lynxNode.labels.map(lynxNodeLabel => lynxNodeLabel.value).toArray
+        expectedLabels.zip(actualLabels).foreach(pair => Assert.assertEquals(pair._1, pair._2))
+        val expectedPropMap: LynxMap = LynxMap(expectedNode.keys.map(key => key.value -> expectedNode.property(key).get).toMap)
+        val actualPropMap: LynxMap = LynxMap(lynxNode.keys.map(key => key.value -> expectedNode.property(key).get).toMap)
+        _compareLynxMap(expectedPropMap, actualPropMap)
+      }
     }
   }
 
@@ -200,6 +217,8 @@ class LynxSerializerTest {
       equal
     }
   }
+
+  //TODO: Add LynxNodes and LynxRelationships tests.
 
   // Note: The elements of the two maps should be in same sort.
   private def _compareLynxMap(x: LynxMap, y: LynxMap): Boolean = {

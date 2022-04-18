@@ -33,6 +33,7 @@ class LynxValueSerializer extends BaseSerializer {
       case lynxMap: LynxMap =>
         byteBuf.writeByte(SerializerDataType.LYNXMAP.id)
         _encodeLynxMap(byteBuf, lynxMap)
+      case lynxNode: LynxNode => _encodeLynxNode(byteBuf, lynxNode)
       case _ => throw new Exception(s"Unexpected type of ${value}")
     }
     byteBuf
@@ -79,6 +80,17 @@ class LynxValueSerializer extends BaseSerializer {
       encodeLynxValue(byteBuf, kv._2)
     })
     byteBuf
+  }
+
+  private def _encodeLynxNode(byteBuf: ByteBuf, node: LynxNode): ByteBuf = {
+    val id = node.value.id
+    val labels: List[LynxString] = node.value.labels.map(lynxNodeLabel => LynxString(lynxNodeLabel.value)).toList
+    // Warning: The prop may not exist.
+    val propsMap: Map[String, LynxValue] = node.value.keys.map(key => key.value -> node.value.property(key).get).toMap
+    byteBuf.writeByte(SerializerDataType.LYNXNODE.id)
+    encodeLynxValue(byteBuf, id.toLynxInteger)
+    encodeLynxValue(byteBuf, LynxList(labels))
+    encodeLynxValue(byteBuf, LynxMap(propsMap))
   }
 
 }
