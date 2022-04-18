@@ -1,7 +1,10 @@
 import org.grapheco.lynx._
+import org.grapheco.lynx.cypherplus.{Blob, LynxBlob}
 import org.grapheco.lynx.lynxrpc.{LynxByteBufFactory, LynxValueDeserializer, LynxValueSerializer}
 import org.junit.runners.MethodSorters
 import org.junit.{Assert, FixMethodOrder, Test}
+
+import java.io.File
 
 /**
  * @Author: Airzihao
@@ -155,11 +158,20 @@ class LynxSerializerTest {
     _testFunc(node)
   }
 
+  //Test LynxRelationship
   @Test
   def test18(): Unit = {
     val lynxList = LynxList(List(1, 2.0, "", "123?", -1.0D, true).map(LynxValue(_)))
     val relationship = new TestLynxRelationship(100l, "type1", 101l, 102l, Map("p1" -> lynxList))
     _testFunc(relationship)
+  }
+
+  //Test LynxBlob
+  @Test
+  def test19(): Unit = {
+    val blob: Blob = Blob.fromFile(new File(s"${TestUtils.getModuleRootPath}/src/test/testInput/car1.jpg"))
+    val lynxBlob = LynxBlob(blob)
+    _testFunc(lynxBlob)
   }
 
   private def _testFunc(input: Any): Unit ={
@@ -179,6 +191,7 @@ class LynxSerializerTest {
       case lynxBoolean: LynxBoolean => Assert.assertEquals(lynxBoolean.value, deserialized.value)
       case lynxList: LynxList => Assert.assertTrue(_compareLynxList(lynxList, deserialized.asInstanceOf[LynxList]))
       case lynxMap: LynxMap => Assert.assertTrue(_compareLynxMap(lynxMap, deserialized.asInstanceOf[LynxMap]))
+      case lynxBlob: LynxBlob => _compareLynxBlob(lynxBlob, deserialized.asInstanceOf[LynxBlob])
       case lynxNode: LynxNode => {
         val expectedNode: LynxNode = input.asInstanceOf[TestLynxNode]
         val expectedLabels: Array[String] = expectedNode.labels.map(lynxNodeLabel => lynxNodeLabel.value).toArray
@@ -190,6 +203,7 @@ class LynxSerializerTest {
         expectedLabels.zip(actualLabels).foreach(pair => Assert.assertEquals(pair._1, pair._2))
         _compareLynxMap(expectedPropMap, actualPropMap)
       }
+
       case lynxRelationship: LynxRelationship => {
         val expectedRelationship: LynxRelationship = input.asInstanceOf[LynxRelationship]
         val expectedType: String = expectedRelationship.relationType.get.value
@@ -247,8 +261,6 @@ class LynxSerializerTest {
     }
   }
 
-  //TODO: Add LynxNodes and LynxRelationships tests.
-
   // Note: The elements of the two maps should be in same sort.
   private def _compareLynxMap(x: LynxMap, y: LynxMap): Boolean = {
     val xMap: Map[String, LynxValue] = x.value
@@ -256,6 +268,15 @@ class LynxSerializerTest {
     val keysEqual: Boolean = xMap.keys.sameElements(yMap.keys)
     val valuesEqual: Boolean = _compareLynxList(LynxList(xMap.values.toList), LynxList(yMap.values.toList))
     keysEqual && valuesEqual
+  }
+
+  private def _compareLynxBlob(x: LynxBlob, y: LynxBlob): Unit = {
+    val xBlob: Blob = x.blob
+    val yBlob: Blob = y.blob
+    Assert.assertEquals(xBlob.mimeType.code, yBlob.mimeType.code)
+    Assert.assertEquals(xBlob.mimeType.text, yBlob.mimeType.text)
+    Assert.assertEquals(xBlob.length, yBlob.length)
+    Assert.assertArrayEquals(xBlob.toBytes(), yBlob.toBytes())
   }
 
 }

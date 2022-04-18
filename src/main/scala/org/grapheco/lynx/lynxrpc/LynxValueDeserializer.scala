@@ -2,6 +2,8 @@ package org.grapheco.lynx.lynxrpc
 
 import io.grpc.netty.shaded.io.netty.buffer.ByteBuf
 import org.grapheco.lynx._
+import org.grapheco.lynx.cypherplus.blob.BytesInputStreamSource
+import org.grapheco.lynx.cypherplus.{Blob, LynxBlob, MimeType}
 
 /**
  * @Author: Airzihao
@@ -17,6 +19,7 @@ class LynxValueDeserializer extends BaseDeserializer {
       case SerializerDataType.DOUBLE => LynxDouble(byteBuf.readDouble())
       case SerializerDataType.STRING => LynxString(_decodeStringWithFlag(byteBuf))
       case SerializerDataType.BOOLEAN => LynxBoolean(byteBuf.readBoolean())
+      case SerializerDataType.LYNXBLOB => _decodeLynxBlob(byteBuf)
       case SerializerDataType.LYNXLIST => _decodeLynxList(byteBuf)
       case SerializerDataType.LYNXMAP => _decodeLynxMap(byteBuf)
       case SerializerDataType.LYNXNODE => _decodeLynxNode(byteBuf)
@@ -88,6 +91,17 @@ class LynxValueDeserializer extends BaseDeserializer {
 
       override def property(propertyKey: LynxPropertyKey): Option[LynxValue] = _props.get(propertyKey.value)
     }
+  }
+
+  private def _decodeLynxBlob(byteBuf: ByteBuf): LynxBlob = {
+    val mimeCode: Long = byteBuf.readLong()
+    val mimeText: String = _decodeStringWithFlag(byteBuf)
+    val mimeType: MimeType = MimeType(mimeCode, mimeText)
+    val length: Long = byteBuf.readLong()
+    val bytes: Array[Byte] = new Array[Byte](length.toInt)
+    byteBuf.readBytes(bytes)
+    val bytesInputStreamSource: BytesInputStreamSource = new BytesInputStreamSource(bytes)
+    LynxBlob(Blob.makeBlob(length, mimeType, bytesInputStreamSource))
   }
 
 }

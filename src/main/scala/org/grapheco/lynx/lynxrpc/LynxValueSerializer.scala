@@ -2,6 +2,7 @@ package org.grapheco.lynx.lynxrpc
 
 import io.grpc.netty.shaded.io.netty.buffer.ByteBuf
 import org.grapheco.lynx._
+import org.grapheco.lynx.cypherplus.{LynxBlob, MimeType}
 import shapeless.TypeCase
 
 /**
@@ -27,6 +28,9 @@ class LynxValueSerializer extends BaseSerializer {
       case lynxBoolean: LynxBoolean =>
         byteBuf.writeByte(SerializerDataType.BOOLEAN.id)
         byteBuf.writeBoolean(lynxBoolean.value)
+      case lynxBlob: LynxBlob =>
+        byteBuf.writeByte(SerializerDataType.LYNXBLOB.id)
+        _encodeLynxBlob(byteBuf, lynxBlob)
       case lynxList: LynxList =>
         byteBuf.writeByte(SerializerDataType.LYNXLIST.id)
         _encodeLynxList(byteBuf, lynxList)
@@ -109,5 +113,16 @@ class LynxValueSerializer extends BaseSerializer {
     encodeLynxValue(byteBuf, LynxMap(propsMap))
   }
 
+  private def _encodeLynxBlob(byteBuf: ByteBuf, lynxBlob: LynxBlob): ByteBuf = {
+    val mimeType: MimeType = lynxBlob.blob.mimeType
+    val length: Long = lynxBlob.blob.length
+    val bytes = lynxBlob.blob.toBytes()
+    // encode the MimeType
+    byteBuf.writeLong(mimeType.code)
+    _encodeString(mimeType.text, byteBuf)
+    // encode the bytes
+    byteBuf.writeLong(length)
+    byteBuf.writeBytes(bytes)
+  }
 
 }
