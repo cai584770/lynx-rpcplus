@@ -130,13 +130,6 @@
                             </sources>
                         </configuration>
                     </execution>
-                    <!--                    <execution>-->
-                    <!--                        <id>add-generated-source</id>-->
-                    <!--                        <phase></phase>-->
-                    <!--                        <goals>-->
-                    <!--                            <goal>add</goal>-->
-                    <!--                        </goals>-->
-                    <!--                    </execution>-->
                     <execution>
                         <id>add-resource</id>
                         <phase>generate-resources</phase>
