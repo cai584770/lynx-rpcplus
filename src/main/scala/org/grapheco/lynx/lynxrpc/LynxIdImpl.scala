@@ -1,6 +1,8 @@
 package org.grapheco.lynx.lynxrpc
 
-import org.grapheco.lynx.{LynxId, LynxInteger}
+import org.grapheco.lynx.types.property.LynxInteger
+import org.grapheco.lynx.types.structural.LynxId
+
 
 /**
  * @Author: Airzihao

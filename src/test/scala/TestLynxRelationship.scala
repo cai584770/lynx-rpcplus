@@ -1,5 +1,6 @@
 import org.grapheco.lynx.lynxrpc.LynxIdImpl
-import org.grapheco.lynx.{LynxId, LynxPropertyKey, LynxRelationship, LynxRelationshipType, LynxValue}
+import org.grapheco.lynx.types.LynxValue
+import org.grapheco.lynx.types.structural.{LynxId, LynxPropertyKey, LynxRelationship, LynxRelationshipType}
 
 /**
  * @Author: Airzihao

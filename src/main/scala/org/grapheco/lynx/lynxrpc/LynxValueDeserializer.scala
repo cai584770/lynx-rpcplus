@@ -1,9 +1,12 @@
 package org.grapheco.lynx.lynxrpc
 
 import io.grpc.netty.shaded.io.netty.buffer.ByteBuf
-import org.grapheco.lynx._
 import org.grapheco.lynx.cypherplus.blob.BytesInputStreamSource
 import org.grapheco.lynx.cypherplus.{Blob, LynxBlob, MimeType}
+import org.grapheco.lynx.types.LynxValue
+import org.grapheco.lynx.types.composite.{LynxList, LynxMap}
+import org.grapheco.lynx.types.property.{LynxBoolean, LynxFloat, LynxInteger, LynxString}
+import org.grapheco.lynx.types.structural.{LynxId, LynxNode, LynxNodeLabel, LynxPropertyKey, LynxRelationship, LynxRelationshipType}
 
 /**
  * @Author: Airzihao
@@ -16,7 +19,7 @@ class LynxValueDeserializer extends BaseDeserializer {
     val typeFlag: SerializerDataType.Value = SerializerDataType(byteBuf.readByte().toInt)
     typeFlag match {
       case SerializerDataType.LONG => LynxInteger(byteBuf.readLong())
-      case SerializerDataType.DOUBLE => LynxDouble(byteBuf.readDouble())
+      case SerializerDataType.DOUBLE => LynxFloat(byteBuf.readDouble())
       case SerializerDataType.STRING => LynxString(_decodeStringWithFlag(byteBuf))
       case SerializerDataType.BOOLEAN => LynxBoolean(byteBuf.readBoolean())
       case SerializerDataType.LYNXBLOB => _decodeLynxBlob(byteBuf)
@@ -33,7 +36,7 @@ class LynxValueDeserializer extends BaseDeserializer {
     val length: Int = byteBuf.readInt()
     val value: List[LynxValue] = typeFlag match {
       case SerializerDataType.ARRAY_LONG => new Array[Long](length).map(_ => LynxInteger(byteBuf.readLong())).toList
-      case SerializerDataType.ARRAY_DOUBLE => new Array[Double](length).map(_ => LynxDouble(byteBuf.readDouble())).toList
+      case SerializerDataType.ARRAY_DOUBLE => new Array[Double](length).map(_ => LynxFloat(byteBuf.readDouble())).toList
       case SerializerDataType.ARRAY_STRING => new Array[String](length).map(_ => LynxString(_decodeStringWithFlag(byteBuf))).toList
       case SerializerDataType.ARRAY_BOOLEAN => new Array[Boolean](length).map(_ => LynxBoolean(byteBuf.readBoolean())).toList
       case SerializerDataType.ARRAY_ANY => new Array[Any](length).map(_ => decodeLynxValue(byteBuf)).toList

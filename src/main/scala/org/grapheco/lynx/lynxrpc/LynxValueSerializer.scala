@@ -3,6 +3,10 @@ package org.grapheco.lynx.lynxrpc
 import io.grpc.netty.shaded.io.netty.buffer.ByteBuf
 import org.grapheco.lynx._
 import org.grapheco.lynx.cypherplus.{LynxBlob, MimeType}
+import org.grapheco.lynx.types.LynxValue
+import org.grapheco.lynx.types.composite.{LynxList, LynxMap}
+import org.grapheco.lynx.types.property.{LynxBoolean, LynxFloat, LynxInteger, LynxString}
+import org.grapheco.lynx.types.structural.{LynxId, LynxNode, LynxRelationship}
 import shapeless.TypeCase
 
 /**
@@ -19,7 +23,7 @@ class LynxValueSerializer extends BaseSerializer {
       case lynxInteger: LynxInteger =>
         byteBuf.writeByte(SerializerDataType.LONG.id)
         byteBuf.writeLong(lynxInteger.value)
-      case lynxDouble: LynxDouble =>
+      case lynxDouble: LynxFloat =>
         byteBuf.writeByte(SerializerDataType.DOUBLE.id)
         byteBuf.writeDouble(lynxDouble.value)
       case lynxString: LynxString =>
@@ -47,7 +51,7 @@ class LynxValueSerializer extends BaseSerializer {
   // Caution: Do not write the typeFlag of LynxList again.
   private def _encodeLynxList(byteBuf: ByteBuf, lynxList: LynxList): ByteBuf = {
     val AllLynxInteger = TypeCase[List[LynxInteger]]
-    val AllLynxDouble = TypeCase[List[LynxDouble]]
+    val AllLynxFloat = TypeCase[List[LynxFloat]]
     val AllLynxString = TypeCase[List[LynxString]]
     val AllLynxBoolean = TypeCase[List[LynxBoolean]]
     val AllLynxList = TypeCase[List[LynxList]]
@@ -55,7 +59,7 @@ class LynxValueSerializer extends BaseSerializer {
 
     lynxList.value match {
       case AllLynxInteger(intList) => _encodeLongList(byteBuf, intList.map(lynxInteger => lynxInteger.value))
-      case AllLynxDouble(doubleList) => _encodeDoubleList(byteBuf, doubleList.map(lynxDouble => lynxDouble.value))
+      case AllLynxFloat(doubleList) => _encodeDoubleList(byteBuf, doubleList.map(lynxDouble => lynxDouble.value))
       case AllLynxString(stringList) => _encodeStringList(byteBuf, stringList.map(lynxString => lynxString.value))
       case AllLynxBoolean(booleanList) => _encodeBooleanList(byteBuf, booleanList.map(lynxBoolean => lynxBoolean.value))
       case AllLynxList(listList) => {

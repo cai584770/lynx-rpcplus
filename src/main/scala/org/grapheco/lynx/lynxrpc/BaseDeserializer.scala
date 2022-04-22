@@ -1,7 +1,9 @@
 package org.grapheco.lynx.lynxrpc
 
 import io.grpc.netty.shaded.io.netty.buffer.ByteBuf
-import org.grapheco.lynx._
+import org.grapheco.lynx.types.LynxValue
+import org.grapheco.lynx.types.property.{LynxBoolean, LynxFloat, LynxInteger, LynxString}
+import org.grapheco.lynx.types.time.LynxDate
 
 import java.io.ByteArrayOutputStream
 import java.time.LocalDate
@@ -70,7 +72,7 @@ trait BaseDeserializer {
         byteBuf.readByte()
         LynxString(_decodeStringWithoutFlag(byteBuf))
       })
-      case SerializerDataType.ARRAY_DOUBLE => new Array[Double](length).map(_ => LynxDouble(byteBuf.readDouble()))
+      case SerializerDataType.ARRAY_DOUBLE => new Array[Double](length).map(_ => LynxFloat(byteBuf.readDouble()))
       case SerializerDataType.ARRAY_LONG => new Array[Long](length).map(_ => LynxInteger(byteBuf.readLong()))
       case SerializerDataType.ARRAY_BOOLEAN => new Array[Boolean](length).map(_ => LynxBoolean(byteBuf.readBoolean()))
       case SerializerDataType.ARRAY_ANY => new Array[Any](length).map(_ => LynxValue(_decodeAny(byteBuf)))

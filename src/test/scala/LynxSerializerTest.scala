@@ -1,6 +1,9 @@
-import org.grapheco.lynx._
 import org.grapheco.lynx.cypherplus.{Blob, LynxBlob}
 import org.grapheco.lynx.lynxrpc.{LynxByteBufFactory, LynxValueDeserializer, LynxValueSerializer}
+import org.grapheco.lynx.types.LynxValue
+import org.grapheco.lynx.types.composite.{LynxList, LynxMap}
+import org.grapheco.lynx.types.property._
+import org.grapheco.lynx.types.structural.{LynxNode, LynxRelationship}
 import org.junit.runners.MethodSorters
 import org.junit.{Assert, FixMethodOrder, Test}
 
@@ -91,7 +94,7 @@ class LynxSerializerTest {
   //Test LynxMap[String, LynxNumber]
   @Test
   def test10(): Unit = {
-    val numberMap: Map[String, LynxValue] = Map("one" -> LynxInteger(1), "0.5" -> LynxDouble(0.5), "-1" -> LynxInteger(-1))
+    val numberMap: Map[String, LynxValue] = Map("one" -> LynxInteger(1), "0.5" -> LynxFloat(0.5), "-1" -> LynxInteger(-1))
     val lynxNubmerMap: LynxMap = LynxMap(numberMap)
     _testFunc(lynxNubmerMap)
   }
@@ -116,7 +119,7 @@ class LynxSerializerTest {
   @Test
   def test13(): Unit = {
     val valueMap: Map[String, LynxValue] = Map("true" -> LynxBoolean(true),
-      "string" -> LynxString("string"), "123" -> LynxInteger(123), "1.0" -> LynxDouble(1.0D))
+      "string" -> LynxString("string"), "123" -> LynxInteger(123), "1.0" -> LynxFloat(1.0D))
     val lynxMap: LynxMap = LynxMap(valueMap)
     _testFunc(lynxMap)
   }
@@ -125,7 +128,7 @@ class LynxSerializerTest {
   @Test
   def test14(): Unit = {
     val innerMap: Map[String, LynxValue] = Map("true" -> LynxBoolean(true),
-      "string" -> LynxString("string"), "123" -> LynxInteger(123), "1.0" -> LynxDouble(1.0D))
+      "string" -> LynxString("string"), "123" -> LynxInteger(123), "1.0" -> LynxFloat(1.0D))
     val map: Map[String, LynxValue] = Map("nested map" -> LynxMap(innerMap))
     val lynxMap: LynxMap = LynxMap(map)
     _testFunc(lynxMap)
@@ -186,7 +189,7 @@ class LynxSerializerTest {
   private def _compareLynxValue(input: LynxValue, deserialized: LynxValue): Unit = {
     input match {
       case lynxInteger: LynxInteger => Assert.assertEquals(lynxInteger.value, deserialized.value)
-      case lynxDouble: LynxDouble => Assert.assertEquals(lynxDouble.value, deserialized.value)
+      case lynxFloat: LynxFloat => Assert.assertEquals(lynxFloat.value, deserialized.value)
       case lynxString: LynxString => Assert.assertEquals(lynxString.value, deserialized.value)
       case lynxBoolean: LynxBoolean => Assert.assertEquals(lynxBoolean.value, deserialized.value)
       case lynxList: LynxList => Assert.assertTrue(_compareLynxList(lynxList, deserialized.asInstanceOf[LynxList]))

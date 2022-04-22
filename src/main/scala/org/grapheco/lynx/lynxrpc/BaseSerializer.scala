@@ -1,7 +1,7 @@
 package org.grapheco.lynx.lynxrpc
 
 import io.grpc.netty.shaded.io.netty.buffer.ByteBuf
-import org.grapheco.lynx.LynxDate
+import org.grapheco.lynx.types.time.LynxDate
 /**
  * @Author: Airzihao
  * @Description:
