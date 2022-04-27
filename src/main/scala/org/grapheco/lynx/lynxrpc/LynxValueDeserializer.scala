@@ -85,8 +85,8 @@ class LynxValueDeserializer extends BaseDeserializer {
 
         override def toLynxInteger: LynxInteger = _id
       }
-      override val startNodeId: LynxId = new LynxIdImpl(_id)
-      override val endNodeId: LynxId = new LynxIdImpl(_id)
+      override val startNodeId: LynxId = new LynxIdImpl(_startId)
+      override val endNodeId: LynxId = new LynxIdImpl(_endId)
 
       override def relationType: Option[LynxRelationshipType] = Some(_relationshipType)
 
