@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.grapheco</groupId>
-    <artifactId>lynx-rpc</artifactId>
+    <artifactId>lynx-rpcplus</artifactId>
     <version>0.1.0-SNAPSHOT-20220427</version>
 
     <properties>

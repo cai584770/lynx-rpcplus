@@ -1,2 +1,2 @@
-# lynx-rpc
-The RPC module of lynx
+# lynx-rpcplus
+The RPC-plus module of lynx
