@@ -6,7 +6,7 @@ import org.grapheco.lynx.cypherplus.{Blob, LynxBlob, MimeType}
 import org.grapheco.lynx.types.LynxValue
 import org.grapheco.lynx.types.composite.{LynxList, LynxMap}
 import org.grapheco.lynx.types.property.{LynxBoolean, LynxFloat, LynxInteger, LynxString}
-import org.grapheco.lynx.types.structural.{LynxId, LynxNode, LynxNodeLabel, LynxPropertyKey, LynxRelationship, LynxRelationshipType}
+import org.grapheco.lynx.types.structural.{LynxElement, LynxId, LynxNode, LynxNodeLabel, LynxPath, LynxPropertyKey, LynxRelationship, LynxRelationshipType}
 
 /**
  * @Author: Airzihao
@@ -41,9 +41,25 @@ class LynxValueDeserializer extends BaseDeserializer {
       case SerializerDataType.ARRAY_BOOLEAN => new Array[Boolean](length).map(_ => LynxBoolean(byteBuf.readBoolean())).toList
       case SerializerDataType.ARRAY_ANY => new Array[Any](length).map(_ => decodeLynxValue(byteBuf)).toList
       case SerializerDataType.ARRAY_ARRAY => new Array[Int](length).map(_ => _decodeLynxList(byteBuf)).toList
+      case SerializerDataType.LYNXPATH => _decodeLynxPath(byteBuf)
     }
     LynxList(value)
   }
+
+  def _decodeLynxPath(byteBuf: ByteBuf): LynxPath = {
+    val length: Int = byteBuf.readInt()
+    val listPath: Array[LynxElement] = new Array[LynxElement](length)
+    for (i <- 0 to length - 1) {
+      val element = decodeLynxValue(byteBuf)
+      element match {
+        case r: LynxNode => listPath(i) = r
+        case r: LynxRelationship => listPath(i) = r
+        case _ => new Exception(s"Unexpected type of ${element} in lynxPath to deserialize")
+      }
+    }
+    new LynxPath(listPath)
+  }
+
 
   private def _decodeLynxMap(byteBuf: ByteBuf): LynxMap = {
     val typeFlag: Int = byteBuf.readByte().toInt

@@ -6,7 +6,7 @@ import org.grapheco.lynx.cypherplus.{LynxBlob, MimeType}
 import org.grapheco.lynx.types.LynxValue
 import org.grapheco.lynx.types.composite.{LynxList, LynxMap}
 import org.grapheco.lynx.types.property.{LynxBoolean, LynxFloat, LynxInteger, LynxString}
-import org.grapheco.lynx.types.structural.{LynxId, LynxNode, LynxRelationship}
+import org.grapheco.lynx.types.structural.{LynxId, LynxNode, LynxPath, LynxRelationship}
 import shapeless.TypeCase
 
 /**
@@ -47,6 +47,20 @@ class LynxValueSerializer extends BaseSerializer {
     }
     byteBuf
   }
+
+  def _encodeLynxPath(byteBuf: ByteBuf, lynxPath: LynxPath): ByteBuf = {
+    byteBuf.writeByte(SerializerDataType.LYNXPATH.id)
+    byteBuf.writeInt(lynxPath.elements.length)
+    lynxPath.elements.foreach(element => {
+      element match {
+        case r: LynxRelationship => _encodeLynxRelationship(byteBuf, r)
+        case r: LynxNode => _encodeLynxNode(byteBuf, r)
+        case _ => throw new Exception(s"Unexpected type of ${element} in lynxPath to serialize")
+      }
+    })
+    byteBuf
+  }
+
 
   // Caution: Do not write the typeFlag of LynxList again.
   private def _encodeLynxList(byteBuf: ByteBuf, lynxList: LynxList): ByteBuf = {
