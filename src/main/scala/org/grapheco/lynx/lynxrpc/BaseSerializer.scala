@@ -83,6 +83,9 @@ trait BaseSerializer {
 
   protected def _encodeAny(value: Any, byteBuf: ByteBuf): Unit = {
     value match {
+      case intValue: Int =>
+        byteBuf.writeByte(SerializerDataType.INT.id.toByte)
+        byteBuf.writeInt(intValue)
       case longValue: Long => {
         byteBuf.writeByte(SerializerDataType.LONG.id.toByte)
         byteBuf.writeLong(longValue)
@@ -127,6 +130,12 @@ trait BaseSerializer {
     byteBuf
   }
 
+  protected def releaseBuf(byteBuf: ByteBuf): Array[Byte] = {
+    val dst = new Array[Byte](byteBuf.writerIndex())
+    byteBuf.readBytes(dst)
+    byteBuf.release()
+    dst
+  }
 }
 
 

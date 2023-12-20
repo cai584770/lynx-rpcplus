@@ -68,4 +68,6 @@ object SerializerDataType extends Enumeration {
   val ANY = Value(127, "Any")
   val ARRAY_ANY = Value(-ANY.id, "Array_Any")
 
+  val NULL = Value(22, "Null")
+
 }

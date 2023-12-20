@@ -7,6 +7,8 @@ import org.grapheco.lynx.types.LynxValue
 import org.grapheco.lynx.types.composite.{LynxList, LynxMap}
 import org.grapheco.lynx.types.property.{LynxBoolean, LynxFloat, LynxInteger, LynxString}
 import org.grapheco.lynx.types.structural.{LynxElement, LynxId, LynxNode, LynxNodeLabel, LynxPath, LynxPropertyKey, LynxRelationship, LynxRelationshipType}
+import org.grapheco.pandadb.util.Logging
+import org.scalacheck.Prop.Exception
 
 /**
  * @Author: Airzihao
@@ -14,7 +16,7 @@ import org.grapheco.lynx.types.structural.{LynxElement, LynxId, LynxNode, LynxNo
  * @Date: Created at 11:27 2022/4/14
  * @Modified By:
  */
-class LynxValueDeserializer extends BaseDeserializer {
+class LynxValueDeserializer extends BaseDeserializer with Logging{
   def decodeLynxValue(byteBuf: ByteBuf): LynxValue = {
     val typeFlag: SerializerDataType.Value = SerializerDataType(byteBuf.readByte().toInt)
     typeFlag match {
@@ -27,6 +29,12 @@ class LynxValueDeserializer extends BaseDeserializer {
       case SerializerDataType.LYNXMAP => _decodeLynxMap(byteBuf)
       case SerializerDataType.LYNXNODE => _decodeLynxNode(byteBuf)
       case SerializerDataType.LYNXRELATIONSHIP => _decodeLynxRelationship(byteBuf)
+      case SerializerDataType.LYNXPATH => _decodeLynxPath(byteBuf)
+      case SerializerDataType.NULL => null
+      case _ => {
+        logger.warn(s"Unexpected typeFlag of ${typeFlag}")
+        null
+      }
     }
   }
 
@@ -41,7 +49,6 @@ class LynxValueDeserializer extends BaseDeserializer {
       case SerializerDataType.ARRAY_BOOLEAN => new Array[Boolean](length).map(_ => LynxBoolean(byteBuf.readBoolean())).toList
       case SerializerDataType.ARRAY_ANY => new Array[Any](length).map(_ => decodeLynxValue(byteBuf)).toList
       case SerializerDataType.ARRAY_ARRAY => new Array[Int](length).map(_ => _decodeLynxList(byteBuf)).toList
-      case SerializerDataType.LYNXPATH => _decodeLynxPath(byteBuf)
     }
     LynxList(value)
   }
@@ -54,7 +61,7 @@ class LynxValueDeserializer extends BaseDeserializer {
       element match {
         case r: LynxNode => listPath(i) = r
         case r: LynxRelationship => listPath(i) = r
-        case _ => new Exception(s"Unexpected type of ${element} in lynxPath to deserialize")
+        case _ => throw new java.lang.Exception(s"Unexpected type of ${element} in lynxPath to deserialize")
       }
     }
     new LynxPath(listPath)

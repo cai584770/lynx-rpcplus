@@ -1,12 +1,12 @@
 package org.grapheco.lynx.lynxrpc
 
 import io.grpc.netty.shaded.io.netty.buffer.ByteBuf
-import org.grapheco.lynx._
 import org.grapheco.lynx.cypherplus.{LynxBlob, MimeType}
 import org.grapheco.lynx.types.LynxValue
 import org.grapheco.lynx.types.composite.{LynxList, LynxMap}
 import org.grapheco.lynx.types.property.{LynxBoolean, LynxFloat, LynxInteger, LynxString}
 import org.grapheco.lynx.types.structural.{LynxId, LynxNode, LynxPath, LynxRelationship}
+import org.grapheco.pandadb.util.Logging
 import shapeless.TypeCase
 
 /**
@@ -15,7 +15,7 @@ import shapeless.TypeCase
  * @Date: Created at 17:46 2022/4/13
  * @Modified By:
  */
-class LynxValueSerializer extends BaseSerializer {
+class LynxValueSerializer extends BaseSerializer with Logging {
 
   def encodeLynxValue(byteBuf: ByteBuf, value: LynxValue): ByteBuf = {
     value match {
@@ -43,9 +43,18 @@ class LynxValueSerializer extends BaseSerializer {
         _encodeLynxMap(byteBuf, lynxMap)
       case lynxNode: LynxNode => _encodeLynxNode(byteBuf, lynxNode)
       case lynxRelationship: LynxRelationship => _encodeLynxRelationship(byteBuf, lynxRelationship)
-      case _ => throw new Exception(s"Unexpected type of ${value}")
+      case lynxPath: LynxPath => _encodeLynxPath(byteBuf, lynxPath)
+//      case _ => throw new Exception(s"Unexpected type of ${value}")
+      case _ =>{
+        logger.warn(s"Unexpected type of ${value}")
+        _encodeLynxNull(byteBuf)
+      }
     }
     byteBuf
+  }
+
+  def _encodeLynxNull(byteBuf: ByteBuf) = {
+    byteBuf.writeByte(SerializerDataType.NULL.id)
   }
 
   def _encodeLynxPath(byteBuf: ByteBuf, lynxPath: LynxPath): ByteBuf = {
