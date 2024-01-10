@@ -1,6 +1,7 @@
 package org.grapheco.lynx.lynxrpc
 
 import io.grpc.netty.shaded.io.netty.buffer.ByteBuf
+import org.grapheco.lynx.lynxrpc.LynxByteBufFactory.releaseBuf
 import org.grapheco.lynx.types.time.LynxDate
 /**
  * @Author: Airzihao
@@ -94,14 +95,20 @@ trait BaseSerializer {
         byteBuf.writeByte(SerializerDataType.DOUBLE.id.toByte)
         byteBuf.writeDouble(doubleValue)
       }
-      case stringValue: String => _encodeString(stringValue, byteBuf)
+      case stringValue: String =>
+        byteBuf.writeByte(SerializerDataType.STRING.id.toByte)
+        _encodeString(stringValue, byteBuf)
       case boolValue: Boolean => {
         byteBuf.writeByte(SerializerDataType.BOOLEAN.id.toByte)
         byteBuf.writeBoolean(boolValue)
       }
     }
   }
-
+  def encodeAny(value: Any): Array[Byte] ={
+    val byteBuf: ByteBuf = LynxByteBufFactory.getByteBuf
+    _encodeAny(value, byteBuf)
+    releaseBuf(byteBuf)
+  }
   protected def _writeKV(key: String, value: Any, byteBuf: ByteBuf): ByteBuf = {
     _encodeString(key, byteBuf)
     value match {
@@ -128,13 +135,6 @@ trait BaseSerializer {
       case _ => throw new Exception("Unexpected data type.")
     }
     byteBuf
-  }
-
-  protected def releaseBuf(byteBuf: ByteBuf): Array[Byte] = {
-    val dst = new Array[Byte](byteBuf.writerIndex())
-    byteBuf.readBytes(dst)
-    byteBuf.release()
-    dst
   }
 }
 

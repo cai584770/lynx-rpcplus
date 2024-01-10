@@ -91,5 +91,8 @@ trait BaseDeserializer {
       case _ => throw new Exception(s"Unexpected type for typeId ${typeFlag.id}")
     }
   }
+  def decodeAny(arr: Array[Byte]): Any = {
+    _decodeAny(LynxByteBufFactory.fromBytes(arr))
+  }
 
 }
