@@ -1,6 +1,7 @@
 package org.grapheco.lynx.lynxrpc
 
 import io.grpc.netty.shaded.io.netty.buffer.ByteBuf
+import org.grapheco.lynx.cypherbio.{BioSequence, LynxBioSequence}
 import org.grapheco.lynx.cypherplus.blob.BytesInputStreamSource
 import org.grapheco.lynx.cypherplus.{Blob, LynxBlob, MimeType}
 import org.grapheco.lynx.types.LynxValue
@@ -9,6 +10,8 @@ import org.grapheco.lynx.types.property.{LynxBoolean, LynxFloat, LynxInteger, Ly
 import org.grapheco.lynx.types.structural.{LynxElement, LynxId, LynxNode, LynxNodeLabel, LynxPath, LynxPropertyKey, LynxRelationship, LynxRelationshipType}
 import org.grapheco.pandadb.util.Logging
 import org.scalacheck.Prop.Exception
+
+import java.io.ByteArrayOutputStream
 
 /**
  * @Author: Airzihao
@@ -30,12 +33,31 @@ class LynxValueDeserializer extends BaseDeserializer with Logging{
       case SerializerDataType.LYNXNODE => _decodeLynxNode(byteBuf)
       case SerializerDataType.LYNXRELATIONSHIP => _decodeLynxRelationship(byteBuf)
       case SerializerDataType.LYNXPATH => _decodeLynxPath(byteBuf)
+      case SerializerDataType.LYNXBIOSEQUENCE => _decodeLynxBioSequence(byteBuf)
       case SerializerDataType.NULL => null
       case _ => {
         logger.warn(s"Unexpected typeFlag of ${typeFlag}")
         null
       }
     }
+  }
+
+
+
+
+  protected def _decodeLynxBioSequence(byteBuf: ByteBuf): LynxBioSequence = {
+    val length = byteBuf.readableBytes()
+    val bos: ByteArrayOutputStream = new ByteArrayOutputStream()
+    byteBuf.readBytes(bos, length)
+    val bioSequence = BioSequence.fromBytes(bos.toByteArray)
+
+    val len = bioSequence.length
+    val sequencce = bioSequence.sequence
+    val referenceInformation = bioSequence.referenceInformation
+    val information = bioSequence.information
+
+    LynxBioSequence(BioSequence.makeBioSequence(len,sequencce,referenceInformation,information))
+
   }
 
   // [flag(Byte)],[length(Content)]

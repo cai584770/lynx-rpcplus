@@ -1,3 +1,4 @@
+import org.grapheco.lynx.cypherbio.{BioSequence, LynxBioSequence}
 import org.grapheco.lynx.cypherplus.{Blob, LynxBlob}
 import org.grapheco.lynx.lynxrpc.{LynxByteBufFactory, LynxValueDeserializer, LynxValueSerializer}
 import org.grapheco.lynx.types.LynxValue
@@ -175,6 +176,13 @@ class LynxSerializerTest extends TestBase {
     val blob: Blob = Blob.fromFile(new File(s"${TestUtils.getModuleRootPath}/src/test/testInput/car1.jpg"))
     val lynxBlob = LynxBlob(blob)
     _testFunc(lynxBlob)
+  }
+
+  @Test // test LynxBioSequence
+  def test20(): Unit = {
+    val bioSequence: BioSequence = BioSequence.fromFile(s"${TestUtils.getModuleRootPath}/src/test/testInput/pseudo351_chr1.fa",s"${TestUtils.getModuleRootPath}/src/test/testInput/pseudo403_chr1.fa")
+    val lynxBioSequence = LynxBioSequence(bioSequence)
+    _testFunc(lynxBioSequence)
   }
 
 }

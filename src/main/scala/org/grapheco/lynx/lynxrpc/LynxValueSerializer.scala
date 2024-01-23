@@ -1,6 +1,7 @@
 package org.grapheco.lynx.lynxrpc
 
 import io.grpc.netty.shaded.io.netty.buffer.ByteBuf
+import org.grapheco.lynx.cypherbio.LynxBioSequence
 import org.grapheco.lynx.cypherplus.{LynxBlob, MimeType}
 import org.grapheco.lynx.types.LynxValue
 import org.grapheco.lynx.types.composite.{LynxList, LynxMap}
@@ -44,6 +45,9 @@ class LynxValueSerializer extends BaseSerializer with Logging {
       case lynxNode: LynxNode => _encodeLynxNode(byteBuf, lynxNode)
       case lynxRelationship: LynxRelationship => _encodeLynxRelationship(byteBuf, lynxRelationship)
       case lynxPath: LynxPath => _encodeLynxPath(byteBuf, lynxPath)
+      case lynxBioSequence: LynxBioSequence =>
+        byteBuf.writeByte(SerializerDataType.LYNXBIOSEQUENCE.id)
+        _encodeBioSequence(byteBuf,lynxBioSequence)
 //      case _ => throw new Exception(s"Unexpected type of ${value}")
       case _ =>{
         logger.warn(s"Unexpected type of ${value}")
@@ -151,5 +155,19 @@ class LynxValueSerializer extends BaseSerializer with Logging {
     byteBuf.writeLong(length)
     byteBuf.writeBytes(bytes)
   }
+
+  protected def _encodeBioSequence(byteBuf: ByteBuf,lynxBioSequence: LynxBioSequence): ByteBuf = {
+    val lenth:Long  = lynxBioSequence.bioSequence.length
+    val sequencce = lynxBioSequence.bioSequence.sequence
+    val referenceInformation = lynxBioSequence.bioSequence.referenceInformation
+    val information = lynxBioSequence.bioSequence.information
+
+
+    val bytes = lynxBioSequence.bioSequence.toBytes()
+    byteBuf.writeBytes(bytes)
+
+    byteBuf
+  }
+
 
 }

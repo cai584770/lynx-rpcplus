@@ -1,3 +1,4 @@
+import org.grapheco.lynx.cypherbio.{BioSequence, LynxBioSequence}
 import org.grapheco.lynx.cypherplus.{Blob, LynxBlob}
 import org.grapheco.lynx.lynxrpc.{LynxByteBufFactory, LynxValueDeserializer, LynxValueSerializer}
 import org.grapheco.lynx.types.LynxValue
@@ -32,6 +33,7 @@ class TestBase {
       case lynxList: LynxList => Assert.assertTrue(_compareLynxList(lynxList, deserialized.asInstanceOf[LynxList]))
       case lynxMap: LynxMap => Assert.assertTrue(_compareLynxMap(lynxMap, deserialized.asInstanceOf[LynxMap]))
       case lynxBlob: LynxBlob => _compareLynxBlob(lynxBlob, deserialized.asInstanceOf[LynxBlob])
+      case lynxBioSequence: LynxBioSequence => _compareLynxBioSequence(lynxBioSequence,deserialized.asInstanceOf[LynxBioSequence])
       case lynxNode: LynxNode => {
         val expectedNode: LynxNode = lynxNode
         val actualNode: LynxNode = deserialized.asInstanceOf[LynxNode]
@@ -120,6 +122,15 @@ class TestBase {
     Assert.assertEquals(xBlob.mimeType.text, yBlob.mimeType.text)
     Assert.assertEquals(xBlob.length, yBlob.length)
     Assert.assertArrayEquals(xBlob.toBytes(), yBlob.toBytes())
+  }
+
+  protected def _compareLynxBioSequence(x: LynxBioSequence, y: LynxBioSequence): Unit = {
+    val xLynxBioSequence: BioSequence = x.bioSequence
+    val yLynxBioSequence: BioSequence = y.bioSequence
+    Assert.assertEquals(xLynxBioSequence.length, yLynxBioSequence.length)
+    Assert.assertEquals(xLynxBioSequence.sequence, xLynxBioSequence.sequence)
+    Assert.assertEquals(xLynxBioSequence.referenceInformation, yLynxBioSequence.referenceInformation)
+    Assert.assertEquals(xLynxBioSequence.information, yLynxBioSequence.information)
   }
 
 }

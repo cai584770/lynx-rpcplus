@@ -65,6 +65,17 @@ object SerializerDataType extends Enumeration {
 
   val LYNXPATH = Value(21, "LynxPath")
 
+
+  // biosequence
+  val BIOSEQUENCE = Value(64, "BioSequence")
+  val ARRAY_BIOSEQUENCE = Value(-BIOSEQUENCE.id, "Array_BioSequence")
+
+  val LYNXBIOSEQUENCE = Value(65, "LynxBioSequence")
+
+
+
+
+
   val ANY = Value(127, "Any")
   val ARRAY_ANY = Value(-ANY.id, "Array_Any")
 
